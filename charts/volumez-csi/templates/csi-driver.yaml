@@ -1,8 +1,0 @@
-apiVersion: storage.k8s.io/v1
-kind: CSIDriver
-metadata:
-  name: vlz
-spec:
-  attachRequired: true
-  podInfoOnMount: true
-  fsGroupPolicy: {{ .Values.vlzCsiDriver.fsGroupPolicy }}
