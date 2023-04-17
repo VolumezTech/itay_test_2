@@ -19,12 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Verify Chart Version
-        run: |        
-          set -e
-
-          # Get the current version number from Chart.yaml
-          current_version=$(grep '^version:' charts/volumez-csi/Chart.yaml | awk '{print $2}')
-          
+        run: |
+        
           # Get the base commit SHA for the pull request
           base_commit=$(jq .pull_request.base.sha -r "$GITHUB_EVENT_PATH")
           
@@ -32,9 +28,17 @@ jobs:
           git fetch &> /dev/null
           previous_version=$(git show $base_commit:charts/volumez-csi/Chart.yaml | grep '^version:' | awk '{print $2}')
           
-          # Compare the current and previous versions
-          function ver { printf "%03d%03d%03d%03d" $(echo "$1" | tr '.' ' '); }
-          if [ $(ver $current_version) -le $(ver $previous_version) ]; then
-            echo "Error: Chart version not incremented. Expected a version higher than $previous_version but got $current_version"
-            exit 1
+          if [[ $previous_version == *"rc"* ]]; then
+            # Increment the RC version
+            rc_version=$(echo $version | awk -F '-rc.' '{print $2}')
+            new_rc_version=$(expr $rc_version + 1)
+            new_version=$(echo $previous_version | sed "s/rc.$rc_version/rc.$new_rc_version/")
+          else
+            # Increment the minor version
+            minor_version=$(echo $version | awk -F '.' '{print $2}')
+            new_minor_version=$(expr $minor_version + 1)
+            new_version=$(echo $version | sed "s/.$minor_version./.$new_minor_version./")
           fi
+          
+          sed -i "s/version: $version/version: $new_version/" charts/volumez-csi/Chart.yaml
+
