@@ -27,17 +27,20 @@ jobs:
           # Get the version number from Chart.yaml in the base commit
           git fetch &> /dev/null
           previous_version=$(git show $base_commit:charts/volumez-csi/Chart.yaml | grep '^version:' | awk '{print $2}')
+          echo $previous_version
           
           if [[ $previous_version == *"rc"* ]]; then
             # Increment the RC version
             rc_version=$(echo $version | awk -F '-rc.' '{print $2}')
             new_rc_version=$(expr $rc_version + 1)
             new_version=$(echo $previous_version | sed "s/rc.$rc_version/rc.$new_rc_version/")
+            echo $new_version
           else
             # Increment the minor version
             minor_version=$(echo $version | awk -F '.' '{print $2}')
             new_minor_version=$(expr $minor_version + 1)
             new_version=$(echo $version | sed "s/.$minor_version./.$new_minor_version./")
+            echo $new_version
           fi
           
           sed -i "s/version: $version/version: $new_version/" charts/volumez-csi/Chart.yaml
