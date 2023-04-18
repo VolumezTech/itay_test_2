@@ -1,14 +1,15 @@
 name: Release Charts Dev
 
 on:
-  push:
-    branches:
-      - development
   workflow_run:
-    workflows:
-      - 'Verify Chart Version'
-    types:
-      - completed
+      workflows:
+        - 'Verify Chart Version'
+      types:
+        - completed
+#   push:
+#     branches:
+#       - development
+  
 
 jobs:
   release:
