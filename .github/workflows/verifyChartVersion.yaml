@@ -24,10 +24,11 @@ jobs:
         run: |
         
           # Get the base commit SHA for the pull request
-          base_commit=$(jq .pull_request.base.sha -r "$GITHUB_EVENT_PATH")
+          # base_commit=$(jq .pull_request.base.sha -r "$GITHUB_EVENT_PATH")
           
           # Get the version number from Chart.yaml in the base commit
           git fetch &> /dev/null
+          base_commit=$(git rev-parse HEAD)
           previous_version=$(git show $base_commit:charts/volumez-csi/Chart.yaml | grep '^version:' | awk '{print $2}')
           echo "previous version:" $previous_version
           
