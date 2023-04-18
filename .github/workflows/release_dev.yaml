@@ -6,6 +6,7 @@ on:
         - 'Verify Chart Version'
       types:
         - completed
+      branches: [development]
 #   push:
 #     branches:
 #       - development
@@ -14,6 +15,7 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
