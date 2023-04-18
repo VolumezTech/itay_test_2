@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - development
-  pull_request:
-    types: [closed]
-    branches:
-      - development
 
 jobs:
   release:
