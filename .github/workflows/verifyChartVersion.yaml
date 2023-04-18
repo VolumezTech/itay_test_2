@@ -1,10 +1,9 @@
 name: Verify Chart Version
 
 on:
-  # Triggers the workflow on push or pull request events but only for the "development" branch
-#   push:
-#     branches: [ "development" ]
+  # Triggers the workflow on pull request events but only for the "development" branch
   pull_request:
+    types: [closed]
     branches: [ "development" ]
 
   # Allows you to run this workflow manually from the Actions tab
@@ -18,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
       - name: Verify Chart Version
         run: |
         
@@ -31,16 +32,28 @@ jobs:
           
           if [[ $previous_version == *"rc"* ]]; then
             # Increment the RC version
-            rc_version=$(echo $version | awk -F '-rc.' '{print $2}')
+            rc_version=$(echo $previous_version | awk -F '-rc.' '{print $2}')
             new_rc_version=$(expr $rc_version + 1)
             new_version=$(echo $previous_version | sed "s/rc.$rc_version/rc.$new_rc_version/")
-            echo "new version:" $new_version
+            echo "new version1:" $new_version
           else
             # Increment the minor version
-            minor_version=$(echo $version | awk -F '.' '{print $2}')
+            minor_version=$(echo $previous_version | awk -F '.' '{print $2}')
             new_minor_version=$(expr $minor_version + 1)
-            new_version=$(echo $version | sed "s/.$minor_version./.$new_minor_version./")
-            echo "new version:" $new_version
+            new_version=$(echo $previous_version | sed "s/.$minor_version./.$new_minor_version./")
+            new_version="$new_version-rc.1"
           fi
-          
-          sed -i "s/version: $version/version: $new_version/" charts/volumez-csi/Chart.yaml
+          echo "new version3:" $new_version
+          sed -i "0,/version:/s/version:.*/version: $new_version/" charts/volumez-csi/Chart.yaml
+      
+      - name: Commit changes
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git commit -a -m "Update file in pull request"
+      
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.head_ref }}
