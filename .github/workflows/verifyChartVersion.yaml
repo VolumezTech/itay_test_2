@@ -47,3 +47,15 @@ jobs:
           fi
           echo "new version3:" $new_version
           sed -i "s/version: $version/version: $new_version/" charts/volumez-csi/Chart.yaml
+      
+      - name: Commit changes
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git commit -a -m "Update file in pull request"
+      
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.head_ref }}
