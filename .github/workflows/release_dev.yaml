@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - development
+  workflow_run:
+    workflows:
+      - 'verify chart version'
+    types:
+      - completed
 
 jobs:
   release:
