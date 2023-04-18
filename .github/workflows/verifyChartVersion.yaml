@@ -44,4 +44,3 @@ jobs:
           fi
           
           sed -i "s/version: $version/version: $new_version/" charts/volumez-csi/Chart.yaml
-
